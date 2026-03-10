@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Mini Social Network</h1>
+
+{% if user.is_authenticated %}
+    <p>Добро пожаловать, {{ user.username }}!</p>
+    <a href="{% url 'profile' user.username %}">Мой профиль</a>
+{% else %}
+    <p>Добро пожаловать на сайт!</p>
+{% endif %}
+
+{% endblock %}
