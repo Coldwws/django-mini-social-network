@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Лента постов</h1>
+
+<a href="{% url 'create_post' %}">Создать пост</a>
+
+<hr>
+
+{% for post in posts %}
+
+<div>
+
+    <b>Автор:</b> {{ post.author.username }}
+
+    <p>{{ post.text }}</p>
+
+    {% if post.image %}
+        <img src="{{ post.image.url }}" width="300">
+    {% endif %}
+
+    <p>{{ post.created_at }}</p>
+
+    <a href="{% url 'post_detail' post.id %}">Открыть</a>
+
+    <hr>
+
+</div>
+
+{% endfor %}
+
+{% endblock %}

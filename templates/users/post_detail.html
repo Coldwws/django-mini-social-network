@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Пост</h2>
+
+<p><b>Автор:</b> {{ post.author.username }}</p>
+
+<p>{{ post.text }}</p>
+
+{% if post.image %}
+<img src="{{ post.image.url }}" width="400">
+{% endif %}
+
+<p>{{ post.created_at }}</p>
+
+{% if user == post.author %}
+
+<a href="{% url 'post_edit' post.id %}">Редактировать</a>
+
+<a href=>Удалить</a>
+
+{% endif %}
+
+{% endblock %}
