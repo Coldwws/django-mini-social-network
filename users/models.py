@@ -32,3 +32,14 @@ def create_user_profile(sender,instance,created,**kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete = models.CASCADE) ##Кто поставил Лайк
+
+    post = models.ForeignKey(Post, on_delete = models.CASCADE) ## какому посту
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (('user', 'post'),)

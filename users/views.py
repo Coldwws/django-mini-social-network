@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import RegisterForm, PostForm
 from django.contrib.auth.models import User
 
-from .models import Post
+from .models import Post,Like
 
 
 def home(request):
@@ -72,3 +72,13 @@ def post_edit(request, post_id):
         form = PostForm(instance=post)
 
     return render(request,'users/post_edit.html',{'form':form})
+
+@login_required
+def like_post(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+
+    like,created= Like.objects.get_or_create(user=request.user,post=post)
+    if not created:
+        like.delete()
+
+    return redirect('feed')

@@ -14,11 +14,15 @@
 
 <p>{{ post.created_at }}</p>
 
+<p>❤️ {{ post.like_set.count }} лайков</p>
+
+<form action="{% url 'like_post' post.id %}" method="post">
+{% csrf_token %}
+<button type="submit">❤️ Лайк</button>
+</form>
+
 {% if user == post.author %}
-
 <a href="{% url 'post_edit' post.id %}">Редактировать</a>
-
-<a href=>Удалить</a>
 
 {% endif %}
 

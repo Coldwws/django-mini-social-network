@@ -12,19 +12,29 @@
 
 <div>
 
-    <b>Автор:</b> {{ post.author.username }}
+<b>Автор:</b> {{ post.author.username }}  
 
-    <p>{{ post.text }}</p>
 
-    {% if post.image %}
-        <img src="{{ post.image.url }}" width="300">
-    {% endif %}
+<p>{{ post.text }}</p>
 
-    <p>{{ post.created_at }}</p>
+{% if post.image %}
+<img src="{{ post.image.url }}" width="300">
+{% endif %}
 
-    <a href="{% url 'post_detail' post.id %}">Открыть</a>
+<p>{{ post.created_at }}</p>
 
-    <hr>
+<p>❤️ {{ post.like_set.count }} лайков</p>
+
+
+<form action="{% url 'like_post' post.id %}" method="post">
+{% csrf_token %}
+<button type="submit">❤️ Лайк</button>
+</form>
+
+
+<a href="{% url 'post_detail' post.id %}">Открыть</a>
+
+<hr>
 
 </div>
 
