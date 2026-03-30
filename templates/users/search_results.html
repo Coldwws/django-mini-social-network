@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Результаты поиска{% if query %} для "{{ query }}"{% endif %}</h2>
+
+{% if results %}
+    <ul>
+    {% for user in results %}
+        <li><a href="{% url 'profile' user.username %}">{{ user.username }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Пользователей не найдено</p>
+{% endif %}
+
+{% endblock %}

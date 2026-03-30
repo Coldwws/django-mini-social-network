@@ -20,7 +20,22 @@
 {% csrf_token %}
 <button type="submit">❤️ Лайк</button>
 </form>
+<h3>Комментарии</h3>
+{% for comment in post.comments.all %}
+    <div>
+        <strong>{{ comment.author.username }}:</strong> {{ comment.text }} 
+        <small>{{ comment.created_at|date:"d M Y H:i" }}</small>
+    </div>
+{% empty %}
+    <p>Комментариев пока нет</p>
+{% endfor %}
 
+<h4>Оставить комментарий</h4>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Отправить</button>
+</form>
 {% if user == post.author %}
 <a href="{% url 'post_edit' post.id %}">Редактировать</a>
 

@@ -9,7 +9,7 @@
     <a href="{% url 'feed' %}">Лента постов</a> |
     {% if user.is_authenticated %}
         Привет, {{ user.username }} | <a href="{% url 'profile' user.username %}">Мой профиль</a> |
-        <form action="{% url 'logout' %}" method="post">
+        <form action="{% url 'logout' %}" method="post" style="display: inline">
     {% csrf_token %}
     <button type="submit">Выйти</button>
         
@@ -20,6 +20,11 @@
     {% endif %}
     <hr>
 
+        <form action="{% url 'search_users' %}" method="GET" style="display:inline; margin-left:20px;">
+        <input type="text" name="q" placeholder="Поиск пользователей">
+        <button type="submit">Найти</button>
+    </form>
+    
     {% block content %}
 
     {% endblock %}
