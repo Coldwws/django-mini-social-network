@@ -18,10 +18,10 @@ from django.contrib import admin
 from django.conf.urls.static import static
 from django.urls import path,include
 from django.conf import settings
-from users.views import home
+from users.views import HomeView
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',home,name='home'),
+    path('',HomeView.as_view(),name='home'),
     path('users/',include('users.urls')),
 
     path('accounts/',include('django.contrib.auth.urls')),

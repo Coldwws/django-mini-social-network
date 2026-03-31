@@ -1,13 +1,17 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse_lazy
+
 from .forms import RegisterForm, PostForm, CommentForm
 from django.contrib.auth.models import User
 
 from .models import Post,Like
 
+from django.views.generic import TemplateView,ListView,DetailView,CreateView,UpdateView
 
-def home(request):
-    return render(request, 'home.html')
+class HomeView(TemplateView):
+    template_name = 'home.html'
 
 def register(request):
     if request.method == "POST":
@@ -21,84 +25,119 @@ def register(request):
     return render(request,'users/register.html',{'form':form})
 
 
-def profile(request,username):
-    profile_user = get_object_or_404(User,username=username)
+class ProfileView(ListView):
+    model = Post
+    template_name = 'users/profile.html'
+    context_object_name = 'posts'
 
-    posts = Post.objects.filter(author = profile_user)
-    context = {'profile_user':profile_user,'posts':posts}
+    def get_queryset(self):
+        self.profile_user = get_object_or_404(User, username=self.kwargs["username"])
+
+        return Post.objects.filter(author=self.profile_user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["profile_user"] = self.profile_user
+        return context
 
 
-    return render(request, 'users/profile.html', context)
+class CreatePostView(LoginRequiredMixin, CreateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'users/create_post.html'
+    success_url = reverse_lazy("feed")
 
-@login_required()
-def create_post(request):
-    if request.method == "POST":
-        form = PostForm(request.POST, request.FILES)
-        if form.is_valid():
-            post = form.save(commit=False)
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
 
-            post.author = request.user
-            post.save()
-            return redirect('feed')
-    else:
-        form = PostForm()
-    return render(request,'users/create_post.html',{'form':form})
+class FeedView(ListView):
+    model = Post
+    template_name = 'users/feed.html'
+    context_object_name = 'posts'
+    ordering = ['-created_at']
 
-def feed(request):
-    posts = Post.objects.all().order_by('-created_at')
-    context = {'posts':posts}
+    paginate_by = 7
 
-    return render(request,'users/feed.html',context)
 
-def post_detail(request, post_id):
-    post = get_object_or_404(Post, pk=post_id)
+class PostDetailView(DetailView):
+    model = Post
+    template_name = "users/post_detail.html"
+    context_object_name = "post"
+    pk_url_kwarg = "post_id"
 
-    if request.method == "POST":
+    def get_context_data(self, **kwargs):
+
+        context = super().get_context_data(**kwargs)
+
+        context["form"] = CommentForm()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+
+        self.object = self.get_object()
+
         form = CommentForm(request.POST)
+
         if form.is_valid():
+
             comment = form.save(commit=False)
             comment.author = request.user
-            comment.post = post
+            comment.post = self.object
             comment.save()
-            return redirect('post_detail', post_id=post_id)
-    else:
-        form = CommentForm()
 
-    return render(request,'users/post_detail.html',{'post':post,'form':form})
+        return redirect("post_detail", post_id=self.object.id)
 
+class PostEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
-@login_required
-def post_edit(request, post_id):
-    post = get_object_or_404(Post, pk=post_id)
+    model = Post
+    form_class = PostForm
+    template_name = "users/post_edit.html"
+    pk_url_kwarg = "post_id"
 
-    if post.author != request.user:
-        return redirect('feed')
+    # проверяем что пользователь автор
+    def test_func(self):
 
-    if request.method == 'POST':
-        form = PostForm(request.POST, request.FILES, instance=post)
-        if form.is_valid():
-            form.save()
-            return redirect('post_detail', post_id=post_id)
-    else:
-        form = PostForm(instance=post)
+        post = self.get_object()
 
-    return render(request,'users/post_edit.html',{'form':form})
+        return self.request.user == post.author
+
+    def get_success_url(self):
+
+        return reverse_lazy(
+            "post_detail",
+            kwargs={"post_id": self.object.id}
+        )
 
 @login_required
 def like_post(request, post_id):
+
     post = get_object_or_404(Post, pk=post_id)
 
-    like,created= Like.objects.get_or_create(user=request.user,post=post)
+    like, created = Like.objects.get_or_create(
+        user=request.user,
+        post=post
+    )
+
     if not created:
         like.delete()
 
-    return redirect('feed')
+    return redirect("feed")
 
 def search_users(request):
-    query = request.GET.get('q','')
+    query = request.GET.get("q", "")
     results = []
     if query:
-        results = User.objects.filter(username__icontains=query)
-    context = {'results':results,
-               'query':query}
-    return render(request, "users/search_results.html",context)
+        results = User.objects.filter(
+            username__icontains=query
+        )
+    context = {
+        "results": results,
+        "query": query
+    }
+    return render(
+        request,
+        "users/search_results.html",
+        context
+    )

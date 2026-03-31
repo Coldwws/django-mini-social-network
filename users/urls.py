@@ -1,15 +1,23 @@
-from django.urls import path,include
-
-
-from . import views
+from django.urls import path
+from .views import *
 
 urlpatterns = [
-    path('register/', views.register, name='register'),
-    path('profile/<str:username>/',views.profile, name='profile'),
-    path('feed/',views.feed,name='feed'),
-    path('post/create/', views.create_post, name='create_post'),
-    path('post/<int:post_id>/edit/', views.post_edit, name='post_edit'),
-    path('post/<int:post_id>/',views.post_detail, name='post_detail'),
-    path('post/<int:post_id>/like/',views.like_post, name='like_post'),
-    path('search/', views.search_users, name='search_users')
+
+    path("", HomeView.as_view(), name="home"),
+
+    path("register/", register, name="register"),
+
+    path("feed/", FeedView.as_view(), name="feed"),
+
+    path("create/", CreatePostView.as_view(), name="create_post"),
+
+    path("post/<int:post_id>/", PostDetailView.as_view(), name="post_detail"),
+
+    path("post/<int:post_id>/edit/", PostEditView.as_view(), name="post_edit"),
+
+    path("profile/<str:username>/", ProfileView.as_view(), name="profile"),
+
+    path("like/<int:post_id>/", like_post, name="like_post"),
+
+    path("search/", search_users, name="search_users"),
 ]
