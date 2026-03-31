@@ -20,4 +20,5 @@ urlpatterns = [
     path("like/<int:post_id>/", like_post, name="like_post"),
 
     path("search/", search_users, name="search_users"),
+path('follow/<int:user_id>/', follow_user, name='follow_user')
 ]

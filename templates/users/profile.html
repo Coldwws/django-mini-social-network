@@ -1,26 +1,70 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
-    <h2>Profile</h2>
+<h2>{{ profile_user.username }}</h2>
 
-    <p>Username:{{ profile_user.username }}</p>
-    <p>Bio: {{ profile_user.profile.bio }}</p>
-    <img src="{{ profile_user.profile.avatar.url }}"  width="160" alt="Аватар"> 
-    
-    <h3>Мои посты:</h3>
-    {% for post in posts %}
-    <div>
-        <p>{{ post.text }}</p>
-        {% if post.image %}
-            <img src="{{ post.image.url }}" width="300">
-        {% endif %}
 
-    <p>{{ post.created_at }}</p>
-        <p>❤️ {{ post.like_set.count }} лайков</p>
-<a href="{% url 'like_post' post.id %}">Лайк</a>
-    <a href="{% url 'post_detail' post.id %}">Открыть</a>
-    </div>
-        <hr>
+{% if request.user != profile_user %}
+<form action="{% url 'follow_user' profile_user.id %}" method="post" style="display:inline-block;">
+    {% csrf_token %}
+    {% if is_following %}
+        <button type="submit">Отписаться</button>
+    {% else %}
+        <button type="submit">Подписаться</button>
+    {% endif %}
+</form>
+{% endif %}
+
+
+<p><strong>{{ followers_count }}</strong> Подписчиков</p>
+<p><strong>{{ following_count }}</strong> Подписок</p>
+
+
+<h3>Подписчики:</h3>
+<div style="display:flex; gap:10px; flex-wrap:wrap;">
+    {% for user in followers_users %}
+        <div style="text-align:center;">
+            <a href="{% url 'profile' user.username %}">
+                <img src="{{ user.profile.avatar.url }}" width="50" height="50" style="border-radius:50%;">
+                <p style="font-size:12px;">{{ user.username }}</p>
+            </a>
+        </div>
+    {% empty %}
+        <p>Нет подписчиков</p>
     {% endfor %}
+</div>
+
+
+<h3>Подписки:</h3>
+<div style="display:flex; gap:10px; flex-wrap:wrap;">
+    {% for user in following_users %}
+        <div style="text-align:center;">
+            <a href="{% url 'profile' user.username %}">
+                <img src="{{ user.profile.avatar.url }}" width="50" height="50" style="border-radius:50%;">
+                <p style="font-size:12px;">{{ user.username }}</p>
+            </a>
+        </div>
+    {% empty %}
+        <p>Нет подписок</p>
+    {% endfor %}
+</div>
+
+<hr>
+
+
+<h3>Мои посты:</h3>
+{% for post in posts %}
+<div style="margin-bottom:20px;">
+    <p>{{ post.text }}</p>
+    {% if post.image %}
+        <img src="{{ post.image.url }}" width="300">
+    {% endif %}
+    <p>{{ post.created_at }}</p>
+    <p>❤️ {{ post.like_set.count }} лайков</p>
+    <a href="{% url 'like_post' post.id %}">Лайк</a> |
+    <a href="{% url 'post_detail' post.id %}">Открыть</a>
+</div>
+<hr>
+{% endfor %}
+
 {% endblock %}

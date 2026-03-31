@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from .forms import RegisterForm, PostForm, CommentForm
 from django.contrib.auth.models import User
 
-from .models import Post,Like
+from .models import Post, Like, Follow
 
 from django.views.generic import TemplateView,ListView,DetailView,CreateView,UpdateView
 
@@ -32,12 +32,24 @@ class ProfileView(ListView):
 
     def get_queryset(self):
         self.profile_user = get_object_or_404(User, username=self.kwargs["username"])
-
         return Post.objects.filter(author=self.profile_user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["profile_user"] = self.profile_user
+
+        context["followers_count"] = self.profile_user.followers.count()
+        context["following_count"] = self.profile_user.following.count()
+
+        context["following_users"] = [f.following for f in self.profile_user.following.all()]
+        context["followers_users"] = [f.follower for f in self.profile_user.followers.all()]
+
+        if self.request.user.is_authenticated:
+            context["is_following"] = self.request.user.following.filter(
+                following = self.profile_user
+            ).exists()
+        else:
+            context["is_following"] = False
         return context
 
 
@@ -140,4 +152,15 @@ def search_users(request):
         request,
         "users/search_results.html",
         context
+)
+
+@login_required()
+def follow_user(request, user_id):
+    user_to_follow = get_object_or_404(User, pk=user_id)
+    follow,created = Follow.objects.get_or_create(
+        follower = request.user,
+        following = user_to_follow
     )
+    if not created:
+        follow.delete()
+    return redirect("profile", username =user_to_follow.username)
