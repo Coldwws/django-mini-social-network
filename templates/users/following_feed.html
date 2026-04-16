@@ -1,0 +1,24 @@
+<h2> Лента подписок </h2>
+
+<div>
+    <a href="{% url 'feed' %}"> Все посты</a>
+</div>
+
+<hr>
+
+{% if posts %}
+    {% for post in posts %}
+        <div style="margin-bottom: 20px">
+            <p><b>{{ post.author.username }}</b></p>
+            <p>{{ post.text }}</p>
+            {% if post.image %}
+                <img src="{{ post.image.url }}" alt="image posts" width="300">
+            {% endif %}
+            <p>{{ post.created_at }}</p>
+            
+        </div>
+<hr>
+{% endfor %}
+{% else %}
+    <p>Вы не на кого не подписаны</p>
+{% endif %}

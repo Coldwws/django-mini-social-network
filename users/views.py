@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 
@@ -164,3 +165,20 @@ def follow_user(request, user_id):
     if not created:
         follow.delete()
     return redirect("profile", username =user_to_follow.username)
+
+
+
+class FollowingFeedView(LoginRequiredMixin,ListView):
+    model = Post
+    template_name = 'users/following_feed.html'
+    context_object_name = 'posts'
+    paginate_by = 7
+
+    def get_queryset(self):
+        following_users = Follow.objects.filter(
+            follower=self.request.user
+        ).values_list('following', flat=True)
+
+        return Post.objects.filter(
+            Q(author__in=following_users)
+        ).order_by('-created_at')
