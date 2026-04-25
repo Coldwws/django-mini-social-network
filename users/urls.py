@@ -15,6 +15,7 @@ urlpatterns = [
 
     path("post/<int:post_id>/edit/", PostEditView.as_view(), name="post_edit"),
 
+    path('profile/edit/', ProfileUpdateView.as_view(), name='profile_edit'),
     path("profile/<str:username>/", ProfileView.as_view(), name="profile"),
 
     path("like/<int:post_id>/", like_post, name="like_post"),

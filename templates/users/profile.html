@@ -2,7 +2,11 @@
 
 {% block content %}
 <h2>{{ profile_user.username }}</h2>
-
+<img src="{{ user.profile.avatar.url }}" width="50" height="50" style="border-radius:50%;">
+<p style="font-size:12px;"><h1>Биография: </h1>{{ user.profile.bio }}</p>
+{% if user == profile_user %}
+    <a href="{% url 'profile_edit' %}">Редактировать профиль</a>
+{% endif %}
 
 {% if request.user != profile_user %}
 <form action="{% url 'follow_user' profile_user.id %}" method="post" style="display:inline-block;">

@@ -4,10 +4,10 @@ from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 
-from .forms import RegisterForm, PostForm, CommentForm
+from .forms import RegisterForm, PostForm, CommentForm,ProfileUpdateForm
 from django.contrib.auth.models import User
 
-from .models import Post, Like, Follow
+from .models import Post, Like, Follow, Profile
 
 from django.views.generic import TemplateView,ListView,DetailView,CreateView,UpdateView
 
@@ -182,3 +182,19 @@ class FollowingFeedView(LoginRequiredMixin,ListView):
         return Post.objects.filter(
             Q(author__in=following_users)
         ).order_by('-created_at')
+
+
+class ProfileUpdateView(LoginRequiredMixin,UpdateView):
+    model = Profile
+    form_class = ProfileUpdateForm
+    template_name = 'users/profile_edit.html'
+
+
+    def get_object(self):
+        return self.request.user.profile
+
+    def get_success_url(self):
+        return reverse_lazy(
+            "profile",
+            kwargs={'username': self.request.user.username}
+        )
